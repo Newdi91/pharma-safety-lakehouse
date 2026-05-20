@@ -1,0 +1,1 @@
+OPENFDA_BASE_URL = "https://api.fda.gov/drug/event.json"
