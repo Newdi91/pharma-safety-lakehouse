@@ -1,5 +1,6 @@
 from ingestion.openfda_client import OpenFDAClient
 from storage.raw_writer import RawWriter
+from pipeline import OpenFDAPipeline
 import logging
 
 
@@ -9,26 +10,20 @@ logger = logging.getLogger(__name__)
 
 def main():
 
-    logger.info("Starting OpenFDA ingestion")
-
     client = OpenFDAClient(timeout=10)
     writer = RawWriter(base_path="data/raw/openfda")
 
-    data = client.get_adverse_events(limit=5)
+    pipeline = OpenFDAPipeline(
+        client=client,
+        writer=writer,
+        logger=logger
+    )
 
-    if not data:
-        logger.error("API returned empty response")
-        return
-
-    file_path = writer.save(data)
-
-    logger.info(f"Saved raw data to {file_path}")
-    logger.info("Ingestion completed")
+    pipeline.run(limit=5)
 
 
 if __name__ == "__main__":
     main()
-
    
 
    

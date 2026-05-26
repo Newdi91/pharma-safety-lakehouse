@@ -28,9 +28,20 @@ class RawWriter:
 
         file_path = folder_path / filename
 
+        enriched_data = {
+            "metadata": 
+            {
+                "timestamp": timestamp.isoformat(),
+                "run_id": run_id,
+                "source": "openfda",
+                "record_count": len(data.get("results", []))
+            },
+            "data": data
+        }
+
         
         with open(file_path, "w") as f:
-            json.dump(data, f, indent=2)
+            json.dump(enriched_data, f, indent=2)
 
         
         return str(file_path)
