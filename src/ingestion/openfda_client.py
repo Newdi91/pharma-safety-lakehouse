@@ -7,7 +7,8 @@ class OpenFDAClient:
     def __init__(self, timeout=10):
         self.base_url = OPENFDA_BASE_URL
         self.timeout = timeout
-
+        self.source_name = "openfda"
+        
     def get_adverse_events(self, limit=10):
 
         params = {"limit": limit}

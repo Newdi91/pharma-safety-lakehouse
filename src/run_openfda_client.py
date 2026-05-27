@@ -1,6 +1,6 @@
 from ingestion.openfda_client import OpenFDAClient
 from storage.raw_writer import RawWriter
-from pipeline import OpenFDAPipeline
+from pipeline import IngestionPipeline
 import logging
 
 
@@ -13,7 +13,7 @@ def main():
     client = OpenFDAClient(timeout=10)
     writer = RawWriter(base_path="data/raw/openfda")
 
-    pipeline = OpenFDAPipeline(
+    pipeline = IngestionPipeline(
         client=client,
         writer=writer,
         logger=logger

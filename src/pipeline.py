@@ -1,4 +1,4 @@
-class OpenFDAPipeline:
+class IngestionPipeline:
 
     def __init__(self, client, writer, logger):
         self.client = client
@@ -6,7 +6,7 @@ class OpenFDAPipeline:
         self.logger = logger
 
     def run(self, limit=5):
-        self.logger.info("Starting OpenFDA pipeline")
+        self.logger.info(f"Starting {self.client.source_name} pipeline")
 
         data = self.client.get_adverse_events(limit=limit)
 
