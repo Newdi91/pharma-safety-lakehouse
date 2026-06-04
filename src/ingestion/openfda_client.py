@@ -9,7 +9,7 @@ class OpenFDAClient:
         self.timeout = timeout
         self.source_name = "openfda"
         
-    def get_adverse_events(self, limit=10):
+    def fetch(self, limit=10):
 
         params = {"limit": limit}
 

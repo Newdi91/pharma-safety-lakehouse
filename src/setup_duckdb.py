@@ -1,6 +1,11 @@
+from pathlib import Path
 import duckdb
 
-conn = duckdb.connect("data/warehouse/pharma.duckdb")
+db_path = Path("data/warehouse/pharma.duckdb")
+
+db_path.parent.mkdir(parents=True, exist_ok=True)
+
+conn = duckdb.connect(str(db_path))
 
 
 conn.execute("DROP TABLE IF EXISTS drug_labels")

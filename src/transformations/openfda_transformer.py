@@ -2,27 +2,20 @@ from datetime import datetime
 
 
 def transform_openfda(payload: dict) -> list[dict]:
-    
+
     rows = []
 
-    # -------------------------
-    # 1. metadata (lineage)
-    # -------------------------
+    
     metadata = payload.get("metadata", {})
     source_system = metadata.get("source")
     run_id = metadata.get("run_id")
     ingestion_ts = metadata.get("timestamp")
 
-    # -------------------------
-    # 2. results extraction
-    # -------------------------
+    
     records = payload.get("data", {}).get("results", [])
 
     for record in records:
 
-        # -------------------------
-        # 3. base fields
-        # -------------------------
         report_id = record.get("safetyreportid")
 
         serious = to_bool(record.get("serious"))
@@ -30,10 +23,7 @@ def transform_openfda(payload: dict) -> list[dict]:
         hospitalization = to_bool(record.get("seriousnesshospitalization"))
 
         received_date = normalize_date(record.get("receivedate"))
-
-        # -------------------------
-        # 4. patient block
-        # -------------------------
+        
         patient = record.get("patient", {})
 
         sex = normalize_sex(patient.get("patientsex"))
@@ -41,15 +31,13 @@ def transform_openfda(payload: dict) -> list[dict]:
         drugs = patient.get("drug", [])
         reactions = patient.get("reaction", [])
 
-        # fallback per non perdere record
+        
         if not drugs:
             drugs = [None]
         if not reactions:
             reactions = [None]
 
-        # -------------------------
-        # 5. explode logic (drug × reaction)
-        # -------------------------
+        
         for d in drugs:
             drug_name = safe_get(d, "medicinalproduct")
             drug_role = safe_get(d, "drugcharacterization")
@@ -57,39 +45,29 @@ def transform_openfda(payload: dict) -> list[dict]:
             for r in reactions:
 
                 rows.append({
-                    # identifiers
+
+                   
                     "report_id": report_id,
-                    "run_id": run_id,
-
-                    # lineage
-                    "source_system": source_system,
-                    "ingestion_timestamp": ingestion_ts,
-
-                    # patient
                     "sex": sex,
-
-                    # drug
                     "drug": drug_name,
                     "drug_role": drug_role,
-
-                    # reaction
                     "reaction": safe_get(r, "reactionmeddrapt"),
 
-                    # severity
                     "serious": serious,
                     "death": death,
                     "hospitalization": hospitalization,
 
-                    # temporal
-                    "received_date": received_date
+                    "received_date": received_date,
+
+                    
+                    "run_id": run_id,
+                    "source_system": source_system,
+                    "ingestion_timestamp": ingestion_ts
                 })
 
     return rows
 
 
-# -------------------------
-# helpers
-# -------------------------
 
 def safe_get(obj, key):
     if not obj:

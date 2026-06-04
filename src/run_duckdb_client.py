@@ -1,7 +1,10 @@
 from ingestion.duckdb_client import DuckDBClient
-from storage.raw_writer import RawWriter
-from pipeline import IngestionPipeline  
+from transformations.duckdb_transformer import transform_duckdb
+from storage.bronze_writer import BronzeWriter
+from storage.silver_writer import SilverWriter
+from pipeline.ingestion_pipeline import IngestionPipeline
 import logging
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -9,31 +12,27 @@ logger = logging.getLogger(__name__)
 
 def main():
 
-    logger.info("Starting DuckDB ingestion test")
-    
-    client = DuckDBClient("data/warehouse/pharma.duckdb")    
-    writer = RawWriter(base_path="data/raw/duckdb")
-   
+    query = "SELECT * FROM drug_labels"
+
+    client = DuckDBClient("data/warehouse/pharma.duckdb")
+
+    transform_fn = transform_duckdb
+
+    bronze_writer = BronzeWriter(source="duckdb")
+    silver_writer = SilverWriter(source="duckdb")
+
     pipeline = IngestionPipeline(
         client=client,
-        writer=writer,
+        transform_fn=transform_fn,
+        bronze_writer=bronze_writer,
+        silver_writer=silver_writer,
         logger=logger
     )
 
+    result = pipeline.run(query=query)
+
+    logger.info("Pipeline finished")
     
-    query = "SELECT * FROM drug_labels"
-
-    data = client.get_data(query)
-
-    logger.info("Fetched data from DuckDB")
-    logger.info(data["columns"])
-    logger.info(data["rows"])
-
-    
-    file_path = writer.save(data)
-
-    logger.info(f"Saved DuckDB ingestion to: {file_path}")
-
 
 if __name__ == "__main__":
     main()

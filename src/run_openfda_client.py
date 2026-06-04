@@ -1,6 +1,6 @@
 from ingestion.openfda_client import OpenFDAClient
-from storage.raw_writer import RawWriter
-from pipeline import IngestionPipeline
+from storage.bronze_writer import BronzeWriter
+from pipeline.ingestion_pipeline import IngestionPipeline
 import logging
 
 
@@ -10,8 +10,9 @@ logger = logging.getLogger(__name__)
 
 def main():
 
+    
     client = OpenFDAClient(timeout=10)
-    writer = RawWriter(base_path="data/raw/openfda")
+    writer = BronzeWriter("openfda", base_path="data/bronze")
 
     pipeline = IngestionPipeline(
         client=client,
@@ -27,20 +28,4 @@ if __name__ == "__main__":
    
 
    
-
-# base_fields = [
-#     "safetyreportid",
-#     "receivedate",
-#     "transmissiondate",
-#     "serious"
-# ]
-
-# nested_fields = [
-#     "patient"
-# ]
-
-# patient_fields = [
-#     "drug",
-#     "reaction"
-# ] 
 
