@@ -1,31 +1,17 @@
-from ingestion.openfda_client import OpenFDAClient
-from storage.bronze_writer import BronzeWriter
-from pipeline.ingestion_pipeline import IngestionPipeline
-import logging
+import sys
+
+from run_pipeline import main
 
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-def main():
-
-    
-    client = OpenFDAClient(timeout=10)
-    writer = BronzeWriter("openfda", base_path="data/bronze")
-
-    pipeline = IngestionPipeline(
-        client=client,
-        writer=writer,
-        logger=logger
-    )
-
-    pipeline.run(limit=5)
-
-
+# Convenience runner for OpenFDA extraction.
+#
+# If the user does not explicitly pass a --source argument, this script
+# appends `--source openfda` to sys.argv so that run_pipeline will ingest only
+# the OpenFDA source.
+#
+# This also supports CLI forms like `python src/run_openfda_client.py` and
+# respects explicit source arguments if provided.
 if __name__ == "__main__":
+    if not any(arg == "--source" or arg.startswith("--source=") for arg in sys.argv):
+        sys.argv.extend(["--source", "openfda"])
     main()
-   
-
-   
-

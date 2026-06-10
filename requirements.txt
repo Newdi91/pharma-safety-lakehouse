@@ -1,6 +1,4 @@
-pyspark
-delta-spark
 requests
 python-dotenv
-pydantic
 pytest
+duckdb

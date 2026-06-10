@@ -1,0 +1,12 @@
+[project]
+name = "pharma-safety-lakehouse"
+version = "0.1.0"
+description = "Portfolio data engineering lakehouse for pharma safety analytics."
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100

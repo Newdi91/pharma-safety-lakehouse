@@ -1,38 +1,17 @@
-from ingestion.duckdb_client import DuckDBClient
-from transformations.duckdb_transformer import transform_duckdb
-from storage.bronze_writer import BronzeWriter
-from storage.silver_writer import SilverWriter
-from pipeline.ingestion_pipeline import IngestionPipeline
-import logging
+import sys
+
+from run_pipeline import main
 
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-def main():
-
-    query = "SELECT * FROM drug_labels"
-
-    client = DuckDBClient("data/warehouse/pharma.duckdb")
-
-    transform_fn = transform_duckdb
-
-    bronze_writer = BronzeWriter(source="duckdb")
-    silver_writer = SilverWriter(source="duckdb")
-
-    pipeline = IngestionPipeline(
-        client=client,
-        transform_fn=transform_fn,
-        bronze_writer=bronze_writer,
-        silver_writer=silver_writer,
-        logger=logger
-    )
-
-    result = pipeline.run(query=query)
-
-    logger.info("Pipeline finished")
-    
-
+# Convenience runner for DuckDB extraction.
+#
+# If the user does not explicitly pass a --source argument, this script
+# appends `--source duckdb` to sys.argv so that run_pipeline will ingest only
+# the DuckDB source.
+#
+# This also supports CLI forms like `python src/run_duckdb_client.py` and
+# respects explicit source arguments if provided.
 if __name__ == "__main__":
+    if not any(arg == "--source" or arg.startswith("--source=") for arg in sys.argv):
+        sys.argv.extend(["--source", "duckdb"])
     main()

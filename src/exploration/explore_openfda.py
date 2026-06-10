@@ -1,46 +1,35 @@
 import json
+from pathlib import Path
 from pprint import pprint
 
-     
-FILE_PATH = "data/raw/openfda/2026/06/03/openfda_132107_fd4989ebb855425794a12a0812128a9e.json"
 
+def inspect_openfda_file(path: Path) -> None:
+    with path.open("r", encoding="utf-8") as handle:
+        data = json.load(handle)
 
-def main():  
-    with open(FILE_PATH, "r") as f:
-        data = json.load(f)
+    print("\nTop-level keys:", sorted(data.keys()))
+    payload = data.get("data", {})
+    print("Data keys:", sorted(payload.keys()))
 
-    print("\n TOP-LEVEL KEYS")
-    print(data.keys())
+    results = payload.get("results")
+    if isinstance(results, list) and results:
+        first_record = results[0]
+        print("\nFirst record keys:", sorted(first_record.keys()))
+        if "patient" in first_record:
+            print("Patient keys:", sorted(first_record["patient"].keys()))
+        print("\nSample record:")
+        pprint(first_record)
+    else:
+        print("No results found in OpenFDA payload.")
 
-    
-    payload = data["data"]
-
-    print("\n PAYLOAD KEYS (data layer)")
-    print(payload.keys())
-
-    
-    results = payload["results"]
-
-    print("\n TYPE OF RESULTS")
-    print(type(results))
-
-    
-    
-    first_record = results[0]
-
-    print("\n FIRST RECORD KEYS")
-    print(sorted(first_record.keys()))
-
-    
-    if "patient" in first_record:
-        print("\n PATIENT KEYS")
-        print(sorted(first_record["patient"].keys()))
-
-    
-    print("\n FULL FIRST RECORD")
-    pprint(first_record)
-
-    
 
 if __name__ == "__main__":
-    main()
+    path = Path("data/raw/openfda")
+    if path.exists():
+        files = sorted(path.rglob("*.json"), reverse=True)
+        if files:
+            inspect_openfda_file(files[0])
+        else:
+            print("No OpenFDA JSON files found under data/raw/openfda.")
+    else:
+        print("OpenFDA raw data path does not exist: data/raw/openfda")
